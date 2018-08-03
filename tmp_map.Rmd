@@ -5,7 +5,7 @@ date: "August 2, 2018"
 output: html_document
 ---
 
-```{r setup, include = TRUE}
+```{r load, include = TRUE, cache = TRUE, eval = TRUE}
 knitr::opts_chunk$set(echo = FALSE)
 
 # Libraries ------------------
@@ -13,6 +13,7 @@ library(leaflet)
 library(htmltools)
 library(bcmaps)
 library(sf)
+library(dplyr)
 
 # Functions ------------------
 
@@ -73,6 +74,17 @@ st_geometry(df_lab) <- NULL
 labs <- lapply(seq(nrow(df_lab)), function(i) {
   paste0('<p>', data.frame(df_lab[i, "Airzone"]), "</p><p>" , df_lab[i, "station_ct"], " Monitoring Stations", "</p>")
 })
+
+```
+
+```{r setup, include = TRUE, eval = TRUE}
+
+# Libraries ------------------
+library(leaflet)
+library(htmltools)
+library(bcmaps)
+library(sf)
+library(dplyr)
 
 # Mapping -------------
 # create base map and fit to BC bounding box
