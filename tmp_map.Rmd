@@ -5,7 +5,7 @@ date: "August 2, 2018"
 output: html_document
 ---
 
-```{r setup, include=TRUE}
+```{r setup, include = TRUE}
 knitr::opts_chunk$set(echo = FALSE)
 
 # Libraries ------------------
@@ -19,10 +19,9 @@ library(sf)
 # Icons ----------------------
 
 #source files ----------------
-source("01_load.R")
-source("01_clean.R")
-source("01_analysis.R")
-source("01_output.R")
+load("out/data/pm_stats.RData")
+load("out/data/airzone_map.RData")
+load("out/data/airzones_annual_mgmt.RData")
 
 # Data prep ------------------
 # filter for relevant stations. Will add logical later to allow for toggle between 24-h and annual results
