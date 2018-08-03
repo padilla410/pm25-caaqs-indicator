@@ -5,7 +5,7 @@ date: "August 2, 2018"
 output: html_document
 ---
 
-```{r load, include = TRUE, cache = TRUE, eval = TRUE}
+```{r load, include = TRUE, cache = TRUE, eval = TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
 # Libraries ------------------
@@ -77,7 +77,7 @@ labs <- lapply(seq(nrow(df_lab)), function(i) {
 
 ```
 
-```{r setup, include = TRUE, eval = TRUE}
+```{r setup, include = TRUE, eval = TRUE, echo=FALSE, message=FALSE, warning=FALSE}
 
 # Libraries ------------------
 library(leaflet)
