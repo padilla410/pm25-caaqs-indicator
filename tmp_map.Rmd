@@ -1,0 +1,35 @@
+---
+title: "tmp_map"
+author: "LimnoTech"
+date: "August 2, 2018"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(leaflet)
+library(bcmaps)
+
+air_zones <- bcmaps::get_layer('airzones', class = c('sf'))
+
+m = leaflet() %>% addTiles()
+
+
+# set bounds for BC
+m = m %>% fitBounds(-139.06, 48.30, -114.03, 60.0)
+
+
+# popup
+m = m %>% addPopups(-93.65, 42.0285, 'Here is the <b>Department of Statistics</b>, ISU')
+rand_lng = function(n = 10) rnorm(n, -93.65, .01)
+rand_lat = function(n = 10) rnorm(n, 42.0285, .01)
+
+# use automatic bounds derived from lng/lat data
+m = m %>% clearBounds()
+
+# popup
+m %>% addPopups(rand_lng(), rand_lat(), 'Random popups')
+
+```
+
