@@ -105,9 +105,11 @@ m <-
 # add airzone stations
 m <-
   m %>% 
-  addAwesomeMarkers(m, lng = pm_stats_sub$longitude, lat = pm_stats_sub$latitude, label = as.factor(pm_stats_sub$station_name), icon = icons)
-  # addMarkers(m, lng = pm_stats_sub$longitude, lat = pm_stats_sub$latitude, label = as.factor(pm_stats_sub$station_name)
-  #            , popup = 
+  addAwesomeMarkers(m, lng = pm_stats_sub$longitude, lat = pm_stats_sub$latitude, label = as.factor(pm_stats_sub$station_name), icon = icons, popup =
+               paste("<font size = '+2'>Station: ", pm_stats_sub$station_name, "</font><hr>"
+                             , "Air Zone: ", pm_stats_sub$Airzone, "<br>"))
+  # # addMarkers(m, lng = pm_stats_sub$longitude, lat = pm_stats_sub$latitude, label = as.factor(pm_stats_sub$station_name)
+  #            , popup =
   #              paste("<font size = '+2'>Station: ", pm_stats_sub$station_name, "</font><hr>"
   #                            , "Air Zone: ", pm_stats_sub$Airzone, "<br>"))
 
