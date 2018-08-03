@@ -99,15 +99,36 @@ pal_az <-  colorFactor(c('#73A5CD', '#DBDBDB', '#CD7378'), domain = bin_az)
 
 m <- 
   m %>% 
-  addPolygons(data = airzone_map, weight = 3, color = 'white'
-              , fillColor = ~pal_az(caaqs_annual), fillOpacity = 0.75, label = lapply(labs, HTML))
+  addPolygons(data = airzone_map, 
+              weight = 3, 
+              color = 'white',
+              fillColor = ~pal_az(caaqs_annual), 
+              fillOpacity = 0.75, 
+              label = lapply(labs, HTML))
 
 # add airzone stations
-m <-
-  m %>% 
-  addAwesomeMarkers(m, lng = pm_stats_sub$longitude, lat = pm_stats_sub$latitude, label = as.factor(pm_stats_sub$station_name), icon = icons, popup =
-               paste("<font size = '+2'>Station: ", pm_stats_sub$station_name, "</font><hr>"
-                             , "Air Zone: ", pm_stats_sub$Airzone, "<br>"))
+m <- 
+  m %>%
+  addCircleMarkers(data=pm_stats_sub,
+                   lng = pm_stats_sub$longitude,
+                   lat = pm_stats_sub$latitude,
+                   color = "#B93838", 
+                   stroke=0.5,
+                   fillOpacity = 0.8, 
+                   radius = 4,
+                   popup = paste("<font size = '+2'>Station: ",
+                                 pm_stats_sub$station_name, 
+                                 "</font><hr>", "Air Zone: ", 
+                                 pm_stats_sub$Airzone, "<br>")
+                   ) 
+
+#m <-
+#  m %>% 
+#  addAwesomeMarkers(m, lng = pm_stats_sub$longitude, lat = pm_stats_sub$latitude, label = as.factor(pm_stats_sub$station_name), icon = icons, popup =
+#               paste("<font size = '+2'>Station: ", pm_stats_sub$station_name, "</font><hr>"
+#                             , "Air Zone: ", pm_stats_sub$Airzone, "<br>"))
+
+
   # # addMarkers(m, lng = pm_stats_sub$longitude, lat = pm_stats_sub$latitude, label = as.factor(pm_stats_sub$station_name)
   #            , popup =
   #              paste("<font size = '+2'>Station: ", pm_stats_sub$station_name, "</font><hr>"
