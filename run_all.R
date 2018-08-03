@@ -10,10 +10,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-# source("01_load.R")
+source("01_load.R")
 source("02_clean.R")
 source("03_analysis.R")
-# source("04_output.R")
+source("04_output.R")
 
 mon_year <- format(Sys.Date(), "%B%Y")
 outfile <- paste0("envreportbc_pm25_", mon_year, ".pdf")

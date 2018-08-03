@@ -1,69 +1,85 @@
 
+# Libraries ------------------
 library(leaflet)
-# load air zone polygons from bcmaps
-## we are amenable to switching to 'sf' instead of 'sp'
-#
-# air_zones <- airzones(class = 'sp')
-# air_zones <- spTransform(air_zones, CRS = '+proj=longlat +datum=WGS84')
+library(htmltools)
+library(sf)
 
-# reproject airzone map
+# Functions ------------------
+## Used to generate multi-line labels for airzone polygons
+labs <- lapply(seq(nrow(df_lab)), function(i) {
+  paste0('<p>', data.frame(df_lab[i, "Airzone"]), "</p><p>" , df_lab[i, "station_ct"], " Monitoring Stations", "</p>")
+})
 
-# airzone_map_2 <- st_transform(airzone_map, crs = '+proj=longlat +datum=WGS84')
+# Used to conditionally apply color to awesome icons
+get_color <- function(pm_stats_sub) {
+  sapply(pm_stats_sub$metric_value, function(metric_value) {
+    if(metric_value <= 4) {
+      "#F0F0F0"
+    } else if (metric_value > 4 && metric_value <= 6.4) {
+      "#BDBDBD"
+    } else if (metric_value > 6.4 && metric_value <= 10) {
+      "#737373"
+    } else {
+      "#252525"
+    }
+  }) 
+}
 
-# Load pm25 stations
-# pm25_sta <- 
+# Icons ----------------------
+icons <- awesomeIcons(
+  icon = "ios-close"
+  , iconColor = "white"
+  , library = "ion"
+  , markerColor = get_color(pm_stats_sub)
+)
 
-# create base map and fit to bc bounding box
+# Data prep ------------------
+# filter for relevant stations. Will add logical later to allow for toggle between 24-h and annual results
+pm_stats_sub <- pm_stats %>% filter(metric == "pm2.5_annual")
+
+# Identify unique airzones
+az <- unique(airzone_map$Airzone) %>% data.frame(Airzone = ., stringsAsFactors = F)
+
+# summarise stations in each airzone for labeling
+airzone_summary <- pm_stats_sub %>% 
+  group_by(Airzone) %>% 
+  summarise(station_ct = n())
+
+# Ensure all 7 airzones are present
+airzone_summary <- left_join(az, airzone_summary)
+airzone_summary$station_ct[is.na(airzone_summary$station_ct)] <- 0
+
+airzone_map <- left_join(airzone_map, airzone_summary[ , c(1:2)])
+airzone_map <- left_join(airzone_map, airzones_annual_mgmt[ , c(1, 6)])
+airzone_map$caaqs_annual[is.na(airzone_map$caaqs_annual)] <- levels(airzone_map$caaqs_annual)[1]
+
+# Create a dataframe without spatial properties for labeling
+df_lab <- airzone_map
+st_geometry(df_lab) <- NULL
+
+# Mapping -------------
+# create base map and fit to BC bounding box
 m <- 
   leaflet() %>%
   addProviderTiles(leaflet::providers$CartoDB.Positron) %>%  # Add default OpenStreetMap map tiles, CartoDB.Positron
   fitBounds(-139.06, 48.30, -114.03, 60.0)
 
-# format station data
-bin_stns <- c('\u2264 50 ppb', '>50 & \u2264 56 ppb', '>56 & \u2264 63 ppb', '\u2265 63 ppb')
-
-df_pm25_clean <- mutate(pm25_clean
-                            , group = cut(rounded_value, breaks = c(0, 50, 56, 63, max(rounded_value))
-                                          , labels = bin_stns))
-
-df_plot <- left_join(df_pm25_clean, stations_clean)
-
 # add airzones and labels
-## Will add station count later on the second line
-bin_az <- c(levels(pm_caaq_daily_mgmt$caaqs))
-pal_az <-  colorFactor(c('#DBDBDB', '#73A5CD', '#CD7378'), domain = bin_az)
-
-df_poly <- left_join(pm_caaq_daily_mgmt, airzone_map)
+bin_az <- c(levels(airzone_map$caaqs_annual))
+pal_az <-  colorFactor(c('#73A5CD', '#DBDBDB', '#CD7378'), domain = bin_az)
 
 m <- 
   m %>% 
-  addPolygons(data = airzone_map, weight = 2, color = 'white'
-              , fillColor = '#73A5CD', label = labels_df$airzone_name)
+  addPolygons(data = airzone_map, weight = 3, color = 'white'
+              , fillColor = ~pal_az(caaqs_annual), fillOpacity = 0.75, label = lapply(labs, HTML))
 
 # add airzone stations
-## the app only has a select number of stations plotted (e.g., Kitimat Haisla Village is missing),
-## we will discuss the details behind this later
-## 
-
-## assign a palette
-pal_stn <-  colorFactor(c('#F0F0F0', '#BDBDBD', '#737373', '#252525'), domain = bin_stns)
-
-# add HTMLescapes into here
-# add popup options to get where you need to go
-# this currently works but it can't find the image
-E206271_annual_lineplot.svg
 m <-
   m %>% 
-  addMarkers(m, lng = stations_clean$longitude, lat = stations_clean$latitude, label = as.factor(stations_clean$station_name)
+  addAwesomeMarkers(m, lng = pm_stats_sub$longitude, lat = pm_stats_sub$latitude, label = as.factor(pm_stats_sub$station_name), icon = icons)
+  addMarkers(m, lng = pm_stats_sub$longitude, lat = pm_stats_sub$latitude, label = as.factor(pm_stats_sub$station_name)
              , popup = 
-               paste("<font size = '+2'>Station: ", stations_clean$station_name, "</font><hr>"
-                             , "Air Zone: ", stations_clean$category, "<br>"))
+               paste("<font size = '+2'>Station: ", pm_stats_sub$station_name, "</font><hr>"
+                             , "Air Zone: ", pm_stats_sub$Airzone, "<br>"))
 
-             # popupImage('out/station_plots/E206271_annual_lineplot.svg'))
-                             , "<img src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Rlogo.png/274px-Rlogo.png'>"))
-                             # , "<img src = 'out/station_plots/", stations_clean$ems_id, "_annual_lineplot.svg'>"))
-                             # , "<img src = '/out/station_plots/", stations_clean$ems_id, "_annual_lineplot.svg'>", sep = ""))
-                             # , "<img src = '", getwd(), "/out/station_plots/", stations_clean$ems_id, "_annual_lineplot.svg'>", sep = ""))
-
-
-# add legends
+m
